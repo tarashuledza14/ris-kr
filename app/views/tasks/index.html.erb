@@ -1,0 +1,56 @@
+<h1 style="text-align: center; margin-bottom: 30px;">📌 Kanban Board</h1>
+
+<div style="text-align: center; margin-bottom: 20px;">
+  <%= link_to "➕ Нове завдання", new_task_path, style: "background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;" %>
+</div>
+
+<div style="display: flex; gap: 20px; padding: 20px; align-items: flex-start; min-height: 80vh; font-family: sans-serif;">
+
+  <div style="flex: 1; background: #f4f5f7; padding: 15px; border-radius: 8px;">
+    <h3 style="text-align: center; color: #42526e; border-bottom: 2px solid #ddd; padding-bottom: 10px;">📋 To Do</h3>
+    
+    <% @tasks.todo.each do |task| %>
+      <div style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <strong><%= task.title %></strong>
+        <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 12px;">
+          <%= link_to "👁", task, title: "Переглянути" %>
+          
+          <%= button_to "Почати ➡️", task_path(task, task: { status: 'in_progress' }), method: :patch, style: "background: #ffc107; border: none; padding: 5px; border-radius: 3px; cursor: pointer;" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div style="flex: 1; background: #e3f2fd; padding: 15px; border-radius: 8px;">
+    <h3 style="text-align: center; color: #0d47a1; border-bottom: 2px solid #90caf9; padding-bottom: 10px;">🔥 In Progress</h3>
+
+    <% @tasks.in_progress.each do |task| %>
+      <div style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid #2196f3;">
+        <strong><%= task.title %></strong>
+        <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 12px;">
+          <%= button_to "⬅️", task_path(task, task: { status: 'todo' }), method: :patch, style: "background: #eee; border: none; padding: 5px; border-radius: 3px; cursor: pointer;" %>
+          
+          <%= link_to "👁", task %>
+
+          <%= button_to "Готово ✅", task_path(task, task: { status: 'done' }), method: :patch, style: "background: #28a745; color: white; border: none; padding: 5px; border-radius: 3px; cursor: pointer;" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div style="flex: 1; background: #d4edda; padding: 15px; border-radius: 8px;">
+    <h3 style="text-align: center; color: #155724; border-bottom: 2px solid #c3e6cb; padding-bottom: 10px;">🚀 Done</h3>
+
+    <% @tasks.done.each do |task| %>
+      <div style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); opacity: 0.7;">
+        <strong style="text-decoration: line-through; color: #888;"><%= task.title %></strong>
+        <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 12px;">
+          <%= button_to "⬅️ Повернути", task_path(task, task: { status: 'in_progress' }), method: :patch, style: "background: #eee; border: none; padding: 5px; border-radius: 3px; cursor: pointer;" %>
+          
+          <%= button_to "🗑", task, method: :delete, style: "background: #dc3545; color: white; border: none; padding: 5px; border-radius: 3px; cursor: pointer;" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+</div>

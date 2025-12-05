@@ -1,0 +1,35 @@
+<div style="max-width: 600px; margin: 40px auto; font-family: sans-serif;">
+
+  <% if notice %>
+    <p style="color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center;">
+      <%= notice %>
+    </p>
+  <% end %>
+
+  <div style="border: 1px solid #ddd; border-radius: 8px; padding: 30px; background-color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+    
+    <h1 style="margin-top: 0; font-size: 28px; color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
+      <%= @task.title %>
+    </h1>
+
+    <p style="font-size: 18px; margin: 20px 0;">
+      <strong>Статус:</strong>
+      <% if @task.completed %>
+        <span style="color: green; background: #e6ffe6; padding: 5px 10px; border-radius: 15px; font-weight: bold;">✅ Виконано</span>
+      <% else %>
+        <span style="color: #d97706; background: #fff3cd; padding: 5px 10px; border-radius: 15px; font-weight: bold;">⏳ В процесі</span>
+      <% end %>
+    </p>
+
+    <div style="margin-top: 40px; display: flex; align-items: center; gap: 10px;">
+      <%= link_to "✏️ Редагувати", edit_task_path(@task), style: "background-color: #ffc107; color: #212529; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;" %>
+      
+      <%= link_to "⬅ Назад", tasks_path, style: "background-color: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;" %>
+
+      <div style="margin-left: auto;">
+        <%= button_to "🗑 Видалити", @task, method: :delete, style: "background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold;" %>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<%= form_with(model: task, style: "background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #ddd; max-width: 500px;") do |form| %>
+  
+  <% if task.errors.any? %>
+    <div style="color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+      <h2><%= pluralize(task.errors.count, "error") %> prohibited this task from being saved:</h2>
+      <ul>
+        <% task.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :title, "Назва завдання", style: "display: block; font-weight: bold; margin-bottom: 5px; font-family: sans-serif;" %>
+    <%= form.text_field :title, style: "width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px;" %>
+  </div>
+
+  <div style="margin-bottom: 20px; display: flex; align-items: center;">
+    <%= form.check_box :completed, style: "width: 20px; height: 20px; margin-right: 10px; cursor: pointer;" %>
+    <%= form.label :completed, "Вже виконано?", style: "cursor: pointer; font-family: sans-serif;" %>
+  </div>
+
+  <div>
+    <%= form.submit "Зберегти завдання", style: "background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%;" %>
+  </div>
+<% end %>

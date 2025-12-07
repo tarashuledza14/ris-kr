@@ -145,3 +145,29 @@ jobs:
 
     - name: Build Docker image
       run: docker build . --file Dockerfile --tag my-todo-app:latest
+      # ... тут твої попередні джоби (test / build) ...
+
+  deploy:
+    needs: test # <--- ВАЖЛИВО! Деплой буде ТІЛЬКИ якщо тести пройшли
+    if: github.ref == 'refs/heads/main' # Тільки коли пушимо в main
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to AWS via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          script: |
+            # Заходимо в папку проекту на сервері
+            cd todo_app-2
+            
+            # Забираємо свіжий код
+            git pull origin main
+            
+            # Перезбираємо і перезапускаємо (як ми робили вручну)
+            docker compose up --build -d
+            
+            # Чистимо старі образи, щоб місце не закінчилось
+            docker image prune -f

@@ -146,10 +146,9 @@ jobs:
     - name: Build Docker image
       run: docker build . --file Dockerfile --tag my-todo-app:latest
       # ... тут твої попередні джоби (test / build) ...
-
-  deploy:
-    needs: test # <--- ВАЖЛИВО! Деплой буде ТІЛЬКИ якщо тести пройшли
-    if: github.ref == 'refs/heads/main' # Тільки коли пушимо в main
+deploy:
+    needs: build-docker # Чекаємо, поки збереться образ (або test, як у тебе названо попередній крок)
+    if: github.ref == 'refs/heads/main' # Тільки для гілки main
     runs-on: ubuntu-latest
     
     steps:
@@ -163,11 +162,14 @@ jobs:
             # Заходимо в папку проекту на сервері
             cd todo_app-2
             
-            # Забираємо свіжий код
+            # Забираємо зміни з GitHub
             git pull origin main
             
-            # Перезбираємо і перезапускаємо (як ми робили вручну)
+            # Перезбираємо і перезапускаємо (те, що ти робив руками)
             docker compose up --build -d
             
-            # Чистимо старі образи, щоб місце не закінчилось
+            # Виконуємо міграції (щоб база оновилась сама, і не було червоних помилок)
+            docker compose exec -T web bin/rails db:migrate
+            
+            # Чистимо старі образи, щоб місце на сервері не закінчилось
             docker image prune -f

@@ -49,20 +49,25 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
-            # Заходимо в папку проекту
-            cd todo_app-2
+            set -e # Зупинити скрипт при будь-якій помилці
             
-            # --- ВАЖЛИВО: ЖОРСТКЕ ОНОВЛЕННЯ ---
-            # Забираємо інформацію про нову версію
+            # --- ВИПРАВЛЕНО ТУТ ---
+            cd ris-kr
+            # ----------------------
+            
+            echo "Deployment started..."
+            
+            # Жорстке оновлення коду
             git fetch origin main
-            # Примусово робимо код таким, як на GitHub (видаляючи будь-які конфлікти)
             git reset --hard origin/main
             
-            # Перезбираємо і перезапускаємо контейнери
+            # Перезапуск контейнерів
             docker compose up --build -d
             
-            # Запускаємо міграції (прапор -T потрібен для неінтерактивного режиму)
+            # Міграції
             docker compose exec -T web bin/rails db:migrate
             
-            # Чистимо старі образи, щоб звільнити місце на диску
+            # Чистка
             docker image prune -f
+            
+            echo "Deployment finished successfully!"

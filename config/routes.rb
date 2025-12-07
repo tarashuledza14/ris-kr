@@ -5,5 +5,5 @@ Rails.application.routes.draw do
   root "tasks#index" 
   
   # Тут пізніше буде endpoint для Prometheus, наприклад:
-  # mount Yabeda::Prometheus::Exporter => "/metrics"
+   mount Yabeda::Prometheus::Exporter => "/metrics"
 end

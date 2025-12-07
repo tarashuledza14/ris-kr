@@ -58,3 +58,8 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+# Gemfile
+
+gem 'yabeda-prometheus' # Адаптер для Prometheus
+gem 'yabeda-rails'      # Автоматичні метрики для Rails (швидкість запитів, помилки і т.д.)

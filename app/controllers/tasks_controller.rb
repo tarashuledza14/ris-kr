@@ -23,6 +23,10 @@ class TasksController < ApplicationController
   def create
     @task = Task.new(task_params)
 
+    if task_params[:completed] == "1"
+      @task.status = :done
+    end
+
     respond_to do |format|
       if @task.save
         format.html { redirect_to @task, notice: "Task was successfully created." }

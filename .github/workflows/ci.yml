@@ -146,7 +146,7 @@ jobs:
     - name: Build Docker image
       run: docker build . --file Dockerfile --tag my-todo-app:latest
       # ... тут твої попередні джоби (test / build) ...
-deploy:
+  deploy:
     needs: build-docker # Чекаємо, поки збереться образ (або test, як у тебе названо попередній крок)
     if: github.ref == 'refs/heads/main' # Тільки для гілки main
     runs-on: ubuntu-latest

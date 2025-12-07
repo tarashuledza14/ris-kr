@@ -1,113 +1,3 @@
-# name: CI
-
-# on:
-#   pull_request:
-#   push:
-#     branches: [ main ]
-
-# jobs:
-#   scan_ruby:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v5
-
-#       - name: Set up Ruby
-#         uses: ruby/setup-ruby@v1
-#         with:
-#           bundler-cache: true
-
-#       - name: Scan for common Rails security vulnerabilities using static analysis
-#         run: bin/brakeman --no-pager
-      
-#       - name: Scan for known security vulnerabilities in gems used
-#         run: bin/bundler-audit
-      
-#   lint:
-#     runs-on: ubuntu-latest
-#     env:
-#       RUBOCOP_CACHE_ROOT: tmp/rubocop
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v5
-
-#       - name: Set up Ruby
-#         uses: ruby/setup-ruby@v1
-#         with:
-#           bundler-cache: true
-
-#       - name: Prepare RuboCop cache
-#         uses: actions/cache@v4
-#         env:
-#           DEPENDENCIES_HASH: ${{ hashFiles('.ruby-version', '**/.rubocop.yml', '**/.rubocop_todo.yml', 'Gemfile.lock') }}
-#         with:
-#           path: ${{ env.RUBOCOP_CACHE_ROOT }}
-#           key: rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-${{ github.ref_name == github.event.repository.default_branch && github.run_id || 'default' }}
-#           restore-keys: |
-#             rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-
-
-#       - name: Lint code for consistent style
-#         run: bin/rubocop -f github
-
-#   test:
-#     runs-on: ubuntu-latest
-
-#     # services:
-#     #  redis:
-#     #    image: valkey/valkey:8
-#     #    ports:
-#     #      - 6379:6379
-#     #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v5
-
-#       - name: Set up Ruby
-#         uses: ruby/setup-ruby@v1
-#         with:
-#           bundler-cache: true
-
-#       - name: Run tests
-#         env:
-#           RAILS_ENV: test
-#           # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-#           # REDIS_URL: redis://localhost:6379/0
-#         run: bin/rails db:test:prepare test
-
-#   system-test:
-#     runs-on: ubuntu-latest
-
-#     # services:
-#     #  redis:
-#     #    image: valkey/valkey:8
-#     #    ports:
-#     #      - 6379:6379
-#     #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v5
-
-#       - name: Set up Ruby
-#         uses: ruby/setup-ruby@v1
-#         with:
-#           bundler-cache: true
-
-#       - name: Run System Tests
-#         env:
-#           RAILS_ENV: test
-#           # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-#           # REDIS_URL: redis://localhost:6379/0
-#         run: bin/rails db:test:prepare test:system
-
-#       - name: Keep screenshots from failed system tests
-#         uses: actions/upload-artifact@v4
-#         if: failure()
-#         with:
-#           name: screenshots
-#           path: ${{ github.workspace }}/tmp/screenshots
-#           if-no-files-found: ignore
-
 name: CI (Ruby & Docker)
 
 on:
@@ -132,7 +22,6 @@ jobs:
     - name: Install dependencies
       run: bundle install
 
-    # Тут міг бути запуск тестів (rspec), але поки просто перевіримо, чи код валідний
     - name: Check Ruby syntax
       run: bundle exec ruby -c config/boot.rb
 
@@ -145,10 +34,11 @@ jobs:
 
     - name: Build Docker image
       run: docker build . --file Dockerfile --tag my-todo-app:latest
-      # ... тут твої попередні джоби (test / build) ...
+
   deploy:
-    needs: build-docker # Чекаємо, поки збереться образ (або test, як у тебе названо попередній крок)
-    if: github.ref == 'refs/heads/main' # Тільки для гілки main
+    needs: build-docker
+    # Цей рядок означає: деплоїмо тільки коли пушимо в гілку main
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     
     steps:
@@ -159,17 +49,20 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
-            # Заходимо в папку проекту на сервері
+            # Заходимо в папку проекту
             cd todo_app-2
             
-            # Забираємо зміни з GitHub
-            git pull origin main
+            # --- ВАЖЛИВО: ЖОРСТКЕ ОНОВЛЕННЯ ---
+            # Забираємо інформацію про нову версію
+            git fetch origin main
+            # Примусово робимо код таким, як на GitHub (видаляючи будь-які конфлікти)
+            git reset --hard origin/main
             
-            # Перезбираємо і перезапускаємо (те, що ти робив руками)
+            # Перезбираємо і перезапускаємо контейнери
             docker compose up --build -d
             
-            # Виконуємо міграції (щоб база оновилась сама, і не було червоних помилок)
+            # Запускаємо міграції (прапор -T потрібен для неінтерактивного режиму)
             docker compose exec -T web bin/rails db:migrate
             
-            # Чистимо старі образи, щоб місце на сервері не закінчилось
+            # Чистимо старі образи, щоб звільнити місце на диску
             docker image prune -f

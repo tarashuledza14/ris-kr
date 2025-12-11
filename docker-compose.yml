@@ -1,5 +1,4 @@
 services:
-  # Твій Ruby додаток
   web:
     build: .
     command: bash -c "rm -f tmp/pids/server.pid && bin/rails s -b '0.0.0.0'"
@@ -9,14 +8,7 @@ services:
       - "3000:3000"
     environment:
       RAILS_ENV: development
-    # depends_on:
-    #   - db
 
-  # База даних (у тебе sqlite, але для docker-compose часто виділяють окремо, 
-  # проте для sqlite достатньо volumes у web. 
-  # Якщо хочеш postgres - розкоментуй, але поки лишимо просто web для простоти з sqlite)
-  
-  # Prometheus (збирає метрики)
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -26,11 +18,10 @@ services:
     depends_on:
       - web
 
-  # Grafana (малює красиві графіки)
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3001:3000" # Grafana буде на порту 3001
+      - "3001:3000" 
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:

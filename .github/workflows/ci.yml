@@ -37,7 +37,7 @@ jobs:
 
   deploy:
     needs: build-docker
-    # Цей рядок означає: деплоїмо тільки коли пушимо в гілку main
+
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     
@@ -49,25 +49,19 @@ jobs:
           username: ${{ secrets.AWS_USERNAME }}
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
-            set -e # Зупинити скрипт при будь-якій помилці
+            set -e 
             
-            # --- ВИПРАВЛЕНО ТУТ ---
             cd ris-kr
-            # ----------------------
             
             echo "Deployment started..."
             
-            # Жорстке оновлення коду
             git fetch origin main
             git reset --hard origin/main
             
-            # Перезапуск контейнерів
             docker compose up --build -d
             
-            # Міграції
             docker compose exec -T web bin/rails db:migrate
             
-            # Чистка
             docker image prune -f
             
             echo "Deployment finished successfully!"
